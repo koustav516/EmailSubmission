@@ -190,7 +190,7 @@ FROM
 
 CREATE TABLE Product_defect (
     orderid INT PRIMARY KEY,
-    defect_product_img VARCHAR(255) NOT NULL
+    product_img VARCHAR(255) NOT NULL
 );
 
 INSERT INTO Product_defect (orderid, defect_product_img)
@@ -202,7 +202,7 @@ VALUES
 	
 CREATE TABLE Package_damaged (
     orderid INT PRIMARY KEY,
-    damaged_package_img VARCHAR(255) NOT NULL
+    product_img VARCHAR(255) NOT NULL
 );
 
 INSERT INTO Package_damaged (orderid, damaged_package_img)
@@ -214,7 +214,7 @@ VALUES
 
 CREATE TABLE Fraud_transaction (
 	orderid INT PRIMARY KEY,
-	fraud_transaction_img VARCHAR(255) NOT NULL
+	product_img VARCHAR(255) NOT NULL
    -- we are not having the charged_price attribute here as we will cross check the recognized price with what in database on the fly
 );
 

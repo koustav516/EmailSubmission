@@ -13,7 +13,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
 
 DB_CONFIG = {
     'dbname': os.getenv('DB_NAME'),
@@ -24,11 +24,11 @@ DB_CONFIG = {
 }
 
 def get_db_connection():
-    conn = psycopg2.connect(DB_CONFIG)
+    conn = psycopg2.connect(**DB_CONFIG)
     return conn
 
 def insert_into_table(order_id, image_url, table_name):
-    query = f"INSERT INTO {table_name} (orderid, {table_name.split('_')[0]}_img) VALUES (%s, %s)"
+    query = f"INSERT INTO {table_name} (orderid, product_img) VALUES (%s, %s)"
     conn = get_db_connection()
     with conn.cursor() as cur:
         cur.execute(query, (order_id, image_url))
@@ -39,7 +39,7 @@ def parse_email_content(email_body):
     order_id = re.search(r"Order ID:\s*(\d+)", email_body)
     image_url = re.search(r"Image URL:\s*(https?://[^\s]+)", email_body)
     issue_type = None
-    
+
     if "defective product" in email_body.lower():
         issue_type = "Product_defect"
     elif "damaged package" in email_body.lower():
@@ -61,7 +61,7 @@ def authenticate_gmail():
         creds = Credentials.from_authorized_user_file('./token.json', SCOPES)
     else:
         flow = InstalledAppFlow.from_client_secrets_file('./credentials.json', SCOPES)
-        creds = flow.run_local_server(port=0)
+        creds = flow.run_local_server(port=5001)
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
     service = build('gmail', 'v1', credentials=creds)
@@ -84,7 +84,7 @@ def get_unread_emails(service):
         print(f'An error occurred: {error}')
         return None
     
-##@app.route('/emails', methods=['GET'])
+#@app.route('/emails', methods=['GET'])
 def fetch_emails():
     service = authenticate_gmail()
     emails = get_unread_emails(service)
@@ -95,6 +95,7 @@ def fetch_emails():
     success_count = 0
     for email_body in emails:
         parsed_data = parse_email_content(email_body)
+        print(parsed_data)
         if parsed_data:
             try:
                 insert_into_table(
@@ -109,5 +110,6 @@ def fetch_emails():
     return jsonify({"message": f"Processed {success_count} emails successfully"}), 200
 
 if __name__ == '__main__':
-    fetch_emails()
+    with app.app_context():
+        fetch_emails()  
     app.run()
