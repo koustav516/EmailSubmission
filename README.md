@@ -30,7 +30,8 @@ This Flask-based microservice application processes emails sent to a designated 
   1. Go to the [Google Cloud Console](https://console.cloud.google.com/apis/credentials/)
   2. Enable the Gmail API.
   3. Create OAuth 2.0 credentials and download the credentials.json file.
-  4. Move credentials.json to the root directory of the project and add it to .gitignore for security.
+  4. In the Authorized redirect uri specify `http://localhost:5001/`.
+  5. Move credentials.json to the root directory of the project and add it to .gitignore for security.
 
 - Configure Environment Variables:
 
